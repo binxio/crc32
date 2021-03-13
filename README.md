@@ -3,7 +3,7 @@ crc32 - calculate crc32 checksum
 
 ## Usage
 ```
-	crc32 [ filename ...]
+	crc32 [-decimal] [ filename ...]
 ```
 
 ## Description
@@ -15,12 +15,12 @@ read the content from stdin.
 to return crc32 checksum of specified files, type:
 ```sh
 $ crc32 main.go README.md
-1175033037 main.go
-2279994761 README.md
+aad0247b main.go
+5cbc3315 README.md
 ```
 to return crc32 checksum of stdin, type:
 
 ```sh
 $ cat main.go | crc32
-1175033037
+aad0247b
 ```
