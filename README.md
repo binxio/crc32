@@ -3,13 +3,21 @@ crc32 - calculate crc32 checksum
 
 ## Usage
 ```
-	crc32 [-decimal] [ filename ...]
+usage: crc32 [-decimal] [-polynomial ieee|castagnoli|koopman] [inputfile ...]
+
+  -decimal
+        print crc32 in decimal notation
+
+  -polynomial string
+        polynomial to use to calculate crc32: IEEE, Castagnoli or Koopman (default "castagnoli")
+
 ```
 
 ## Description
 
-Calculate the crc32 checkfum for the specified files. If not specified, it will
-read the content from stdin.
+Calculate the crc32 checksum for the specified files. If not specified, it will
+read the content from stdin. You can specify which polynomial to use. Cloud KMS uses
+Castagnoli.
 
 ## Examples
 to return crc32 checksum of specified files, type:

@@ -7,16 +7,24 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "usage: crc32 [-decimal] [inputfile ...]\n")
+	usageError(nil)
+}
+func usageError(err error) {
+	fmt.Fprintf(os.Stderr, "usage: crc32 [-decimal] [-polynomial ieee|castagnoli|koopman] [inputfile ...]\n")
+
 	flag.PrintDefaults()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\nerror: %s\n", err)
+	}
 	os.Exit(2)
 }
 
-func printCrc32(filename string, content []byte, decimal bool, printFileName bool) {
-	t := crc32.MakeTable(crc32.Castagnoli)
+func printCrc32(filename string, content []byte, decimal bool, polynomial uint32, printFileName bool) {
+	t := crc32.MakeTable(polynomial)
 	crc := crc32.Checksum(content, t)
 
 	if decimal {
@@ -30,10 +38,28 @@ func printCrc32(filename string, content []byte, decimal bool, printFileName boo
 	fmt.Printf("\n")
 }
 
+func polynomialNameToValue(name string) (uint32, error) {
+	if strings.ToLower(name) == "ieee" {
+		return crc32.IEEE, nil
+	}
+	if strings.ToLower(name) == "castagnoli" {
+		return crc32.Castagnoli,  nil
+	}
+	if strings.ToLower(name) == "koopman" {
+		return crc32.Koopman, nil
+	}
+	return crc32.IEEE, fmt.Errorf("%s is not a supported polynomial name", name)
+}
+
 func main() {
 	flag.Usage = usage
 	decimal := flag.Bool("decimal", false, "print crc32 in decimal notation")
+	polynomialName := flag.String("polynomial", "castagnoli", "polynomial to use to calculate crc32: IEEE, Castagnoli or Koopman")
 	flag.Parse()
+	polynomial, err := polynomialNameToValue(*polynomialName)
+	if err != nil {
+		usageError(err)
+	}
 
 	args := flag.Args()
 	if len(args) > 0 {
@@ -42,13 +68,13 @@ func main() {
 			if err != nil {
 				log.Fatalf("[ERROR] failed to open file %s, %s", filename, err)
 			}
-			printCrc32(filename, content, *decimal, true)
+			printCrc32(filename, content, *decimal, polynomial, true)
 		}
 	} else {
 		content, err := ioutil.ReadAll(os.Stdin)
 		if err != nil {
 			log.Fatalf("[ERROR] failed to read from stdin, %s", err)
 		}
-		printCrc32("-", content, *decimal, false)
+		printCrc32("-", content, *decimal, polynomial, false)
 	}
 }
